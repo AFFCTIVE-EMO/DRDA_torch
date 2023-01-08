@@ -92,6 +92,11 @@ for epoch in range(nb_epochs+1):
         #print(source[0].shape, source[1].shape)
         x_target, y_target = target[0], target[1]
         x_source, y_source = source[0], source[1]
+
+        x_target.to(device)
+        y_target.to(device)
+        x_source.to(device)
+        y_source.to(device)
         
         feat_t, pred_t = fc.forward(x_target)
         feat_s, pred_s = fc.forward(x_source)
