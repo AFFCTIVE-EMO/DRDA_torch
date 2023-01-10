@@ -27,7 +27,7 @@ for i in tqdm(file_list, desc="read data"):
     val = labels.T[0].round().astype(np.int8)
     aro = labels.T[1].round().astype(np.int8)
     
-    if(i=="s01.mat"): 
+    if(i=="s03.mat"): 
         Data = data
         VAL = val
         ARO = aro
