@@ -11,7 +11,8 @@ from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 
 ## data load
-path = r'C:\Users\bumsung\PROJECT\drda\drda_torch\DEAP\DEAP\data_preprocessed_matlab/' # 경로는 저장 파일 경로
+
+path = r'../DEAP/data_preprocessed_matlab/'  # 경로는 저장 파일 경로
 file_list = os.listdir(path)
 
 print("data path check")
@@ -85,9 +86,19 @@ criterion = nn.CrossEntropyLoss()
 #  domain discriminator and update the parameters of both the
 #   feature extractor and classifier.
 nb_epochs = 3
-for epoch in range(nb_epochs+1):
-    for i, (target, source) in enumerate(zip(tqdm(target_dataloader), source_dataloader)):
-        print(i, " epoch")
+for epoch in tqdm(nb_epochs+1):
+    temp_gloss = 0
+    temp_dloss = 0
+    temp_accuracy_d = 0
+    temp_accuracy_s = 0
+    g_loss_log = []
+    d_loss_log = []
+    accuracy_s = []
+    accuracy_d = []
+    print(i, ": epoch")
+
+    for i, (target, source) in enumerate(zip(target_dataloader, source_dataloader)):
+        
         #print(i, target[0].shape, target[1].shape)
         #print(source[0].shape, source[1].shape)
         x_target, y_target = target[0], target[1]
@@ -132,11 +143,25 @@ for epoch in range(nb_epochs+1):
         optimizer_cls.zero_grad()
         g_loss.backward()
         optimizer_cls.step()
-            
-        print("loss:" ,g_loss)
-        print("predict ", torch.argmax(pred_t,1)[:10]+1,"\n","labels  ", y_target[:10])
-        print("predict ",torch.argmax(pred_s,1)[:10]+1,"\n","labels  ", y_source[:10])
-        print("판별기 : ",dis_loss)
         
+        temp_gloss += g_loss
+        temp_dloss += dis_loss
+        temp_accuracy_s += ((torch.argmax(pred_t,1)+1)== y_target).to(torch.float).mean()
+        temp_accuracy_d += ((torch.argmax(pred_s,1)+1)== y_source).to(torch.float).mean()
+    
+    print("gloss", temp_gloss)
+    print("dloss", temp_dloss)
+    print("acc_d", temp_accuracy_d)
+    print("acc_s", temp_accuracy_s)
+    
+    g_loss_log.append(temp_gloss)
+    d_loss_log.append(temp_dloss)
+    accuracy_d.append(temp_accuracy_d)
+    accuracy_s.append(temp_accuracy_s)
         
+    
         #python PROJECT\drda\drda_torch\main.py
+
+
+torch.save(fc, './fc.pt')
+torch.save(dis, './dis.pt')  
