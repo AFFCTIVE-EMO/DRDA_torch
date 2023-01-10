@@ -86,7 +86,7 @@ criterion = nn.CrossEntropyLoss()
 #  domain discriminator and update the parameters of both the
 #   feature extractor and classifier.
 nb_epochs = 50
-for epoch in tqdm(nb_epochs+1):
+for epoch in tqdm(range(nb_epochs+1)):
     temp_gloss = 0
     temp_dloss = 0
     temp_accuracy_d = 0
