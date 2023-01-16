@@ -69,8 +69,10 @@ x_train, x_test, y_train, y_test = train_test_split(train_data, train_label, tes
 print("make data loader")
 target_dataset = TensorDataset(x_train, y_train)
 source_dataset = TensorDataset(x_test, y_test)
+val_dataset = TensorDataset(val_data, val_label)
 target_dataloader = DataLoader(target_dataset, 64, shuffle=True)
 source_dataloader = DataLoader(source_dataset, 64, shuffle=True)
+val_dataloader = DataLoader(val_dataset, 64, shuffle=True)
 
 # cuda
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -90,22 +92,30 @@ criterion = nn.CrossEntropyLoss()
 # fix the feature extractor and classifier, and then fix the
 #  domain discriminator and update the parameters of both the
 #   feature extractor and classifier.
+
+g_loss_log = []
+d_loss_log = []
+accuracy_s = []
+accuracy_d = []
+
+best_loss = 10000000
+limit_epoch = 2
+limit_check = 0
+val_loss = 0
 nb_epochs = 3
 for epoch in tqdm(range(nb_epochs+1)):
     temp_gloss = 0
     temp_dloss = 0
     temp_accuracy_d = 0
     temp_accuracy_s = 0
-    g_loss_log = []
-    d_loss_log = []
-    accuracy_s = []
-    accuracy_d = []
+
     print(epoch, ": epoch")
 
-    temp = 0.0
+    temp = 0.0 #batch count
+    fc.train()
     for i, (target, source) in enumerate(zip(target_dataloader, source_dataloader)):
         temp += 1.0
-        print("batch: " , i, end=' ')
+        print("batch: " , i)
 
         #print(i, target[0].shape, target[1].shape)
         #print(source[0].shape, source[1].shape)
@@ -169,14 +179,28 @@ for epoch in tqdm(range(nb_epochs+1)):
     d_loss_log.append(temp_dloss/temp)
     accuracy_d.append(temp_accuracy_d/temp)
     accuracy_s.append(temp_accuracy_s/temp)
-        
     
+    fc.eval()
+    val_loss = 0
+
+    for x_val, y_val in val_dataloader:
+        _, y_pred = fc.forward(x_val)
+        loss = criterion(y_pred, y_val-1)
+        val_loss += loss.item()
+    if val_loss > best_loss:
+        limit_check += 1
+        if(limit_check >= limit_epoch):
+            break
+    else:
+        best_loss = val_loss
+        limit_check = 0
         #python PROJECT\drda\drda_torch\main.py
 
 print(g_loss_log)
 print(d_loss_log)
 print(accuracy_d)
 print(accuracy_s)
+print("val_loss ", val_loss)
 
 torch.save(fc, './fc.pt')
 torch.save(dis, './dis.pt')  
