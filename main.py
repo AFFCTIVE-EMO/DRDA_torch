@@ -102,7 +102,7 @@ best_loss = 10000000
 limit_epoch = 2
 limit_check = 0
 val_loss = 0
-nb_epochs = 3
+nb_epochs = 25
 for epoch in tqdm(range(nb_epochs+1)):
     temp_gloss = 0
     temp_dloss = 0
