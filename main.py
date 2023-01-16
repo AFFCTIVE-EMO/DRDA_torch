@@ -56,9 +56,14 @@ eeg_data=eeg_data.astype('float32')
 eeg_data32 = torch.from_numpy(eeg_data)
 VAL = (torch.from_numpy(VAL)).type(torch.long)
 
+#data 40 x 40 x 8064 video/trial x channel x data
+#labels 40 x 4 video/trial x label (valence, arousal, dominance, liking)
+#32명 -> 4명 / 14명 14명
+
 # data split
 print("data split")
-x_train, x_test, y_train, y_test = train_test_split(eeg_data32, VAL, test_size=0.5)
+train_data, val_data,train_label, val_label = train_test_split(eeg_data32, VAL, test_size=0.125)
+x_train, x_test, y_train, y_test = train_test_split(train_data, train_label, test_size=0.5)
 
 # make data loader
 print("make data loader")
@@ -85,7 +90,7 @@ criterion = nn.CrossEntropyLoss()
 # fix the feature extractor and classifier, and then fix the
 #  domain discriminator and update the parameters of both the
 #   feature extractor and classifier.
-nb_epochs = 50
+nb_epochs = 3
 for epoch in tqdm(range(nb_epochs+1)):
     temp_gloss = 0
     temp_dloss = 0
@@ -162,6 +167,10 @@ for epoch in tqdm(range(nb_epochs+1)):
     
         #python PROJECT\drda\drda_torch\main.py
 
+print(g_loss_log)
+print(d_loss_log)
+print(accuracy_d)
+print(accuracy_s)
 
 torch.save(fc, './fc.pt')
 torch.save(dis, './dis.pt')  
