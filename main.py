@@ -103,7 +103,8 @@ for epoch in tqdm(range(nb_epochs+1)):
     print(i, ": epoch")
 
     for i, (target, source) in enumerate(zip(target_dataloader, source_dataloader)):
-        
+        print("batch: " , i, end=' ')
+        print("\n")
         #print(i, target[0].shape, target[1].shape)
         #print(source[0].shape, source[1].shape)
         x_target, y_target = target[0], target[1]
