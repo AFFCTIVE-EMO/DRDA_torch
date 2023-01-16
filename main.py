@@ -100,9 +100,11 @@ for epoch in tqdm(range(nb_epochs+1)):
     d_loss_log = []
     accuracy_s = []
     accuracy_d = []
-    print(i, ": epoch")
+    print(epoch, ": epoch")
 
+    temp = 0.0
     for i, (target, source) in enumerate(zip(target_dataloader, source_dataloader)):
+        temp += 1.0
         print("batch: " , i, end=' ')
 
         #print(i, target[0].shape, target[1].shape)
@@ -152,21 +154,21 @@ for epoch in tqdm(range(nb_epochs+1)):
         
         temp_gloss += g_loss
         temp_dloss += dis_loss
-        print((torch.argmax(pred_t,1)+1))
-        print(y_target)
-        print(temp_accuracy_s)
+        print((torch.argmax(pred_t,1)+1)[:10])
+        print(y_target[:10])
+
         temp_accuracy_s += ((torch.argmax(pred_t,1)+1)== y_target).to(torch.float).mean()
         temp_accuracy_d += ((torch.argmax(pred_s,1)+1)== y_source).to(torch.float).mean()
     
-    print("\ngloss", temp_gloss)
-    print("dloss", temp_dloss)
-    print("acc_d", temp_accuracy_d)
-    print("acc_s", temp_accuracy_s)
+    print("\ngloss", temp_gloss/temp)
+    print("dloss", temp_dloss/temp)
+    print("acc_d", temp_accuracy_d/temp)
+    print("acc_s", temp_accuracy_s/temp)
     
-    g_loss_log.append(temp_gloss)
-    d_loss_log.append(temp_dloss)
-    accuracy_d.append(temp_accuracy_d)
-    accuracy_s.append(temp_accuracy_s)
+    g_loss_log.append(temp_gloss/temp)
+    d_loss_log.append(temp_dloss/temp)
+    accuracy_d.append(temp_accuracy_d/temp)
+    accuracy_s.append(temp_accuracy_s/temp)
         
     
         #python PROJECT\drda\drda_torch\main.py
